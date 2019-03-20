@@ -19,7 +19,6 @@ public class task extends HttpServlet {
     @Override
     protected void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            response.setHeader("Authorization", CookieWorker.getCookie(request));
             if (session.getName(UUID.fromString(request.getHeader("Authorization"))) != null) {
                 int requestID = Integer.parseInt(request.getParameter("taskId"));
                 try {
@@ -39,7 +38,6 @@ public class task extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            response.setHeader("Authorization", CookieWorker.getCookie(request));
             if (session.getName(UUID.fromString(request.getHeader("Authorization"))) != null) {
                 int requestID = Integer.parseInt(request.getParameter("taskId"));
                 try {
