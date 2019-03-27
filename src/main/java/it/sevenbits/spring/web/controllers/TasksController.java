@@ -3,6 +3,8 @@ package it.sevenbits.spring.web.controllers;
 import it.sevenbits.spring.web.models.CreateTaskRequest;
 import it.sevenbits.spring.core.models.Task;
 import it.sevenbits.spring.core.repository.ITaskRepository;
+import it.sevenbits.spring.web.models.CreateTaskTextRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,9 +18,6 @@ import java.util.List;
 @Controller
 public class TasksController {
     private ITaskRepository repository;
-    private static final int STATUS_GET_ERROR = 403;
-    private static final int STATUS_POST_OK = 201;
-    private static final int STATUS_POST_ERROR = 400;
     /**
      * transmit Bean in constructor
      * @param taskRepository task repository interface
@@ -36,34 +35,31 @@ public class TasksController {
         try {
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(repository.getAllTask());
         } catch (Exception e) {
-            return ResponseEntity.status(STATUS_GET_ERROR).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
     /**
-     * @param task task
+     * @param taskText task
      * @return created task
      */
     @RequestMapping(value = "/tasks", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Task> addTask(final @RequestBody Task task) {
+    public ResponseEntity<Task> addTask(final @RequestBody CreateTaskTextRequest taskText) {
         try {
-            Task newTask = repository.addTask(task);
-            return ResponseEntity.status(STATUS_POST_OK).contentType(MediaType.APPLICATION_JSON).body(newTask);
+            Task newTask = repository.addTask(taskText);
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(newTask);
         } catch (Exception e) {
-            return ResponseEntity.status(STATUS_POST_ERROR).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-
-    private static final int STATUS_PATCH_OK = 204;
-    private static final int STATUS_INVALID_INPUT = 400;
 
     @RequestMapping(value = "/tasks/{taskId}", method = RequestMethod.GET)
     @ResponseBody
     private ResponseEntity<Task> getTaskById(final @PathVariable("taskId") String id) {
         Task task = repository.getTaskById(id);
         if (task != null) {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(task);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).contentType(MediaType.APPLICATION_JSON).body(task);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -71,16 +67,24 @@ public class TasksController {
 
     @RequestMapping(value = "/tasks/{taskId}", method = RequestMethod.PATCH)
     @ResponseBody
-    private ResponseEntity updateTask(final @PathVariable("taskId") String id, final  @RequestBody CreateTaskRequest jsonArgument) {
-        try {
-            if (repository.updateClass(id, jsonArgument.getText())) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.notFound().build();
+    private ResponseEntity updateTask(final @PathVariable("taskId") String id,
+                                      final  @RequestBody CreateTaskRequest jsonArgument) {
+
+            boolean updateText = false, updateStatus = false;
+            if (jsonArgument.getText() != null) {
+                updateText = repository.updateText(id, jsonArgument.getText());
             }
-        } catch (Exception e) {
-            return ResponseEntity.status(STATUS_INVALID_INPUT).build();
-        }
+            if (jsonArgument.getStatus() != null) {
+                updateStatus = repository.updateStatus(id, jsonArgument.getStatus());
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            if (updateText || updateStatus) {
+                return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
     }
 
     @RequestMapping(value = "/tasks/{taskId}", method = RequestMethod.DELETE)
@@ -88,12 +92,12 @@ public class TasksController {
     private ResponseEntity updateTask(final @PathVariable("taskId") String id) {
         try {
             if (repository.deleteTask(id)) {
-                return ResponseEntity.ok().build();
+                return ResponseEntity.status(HttpStatus.ACCEPTED).build();
             } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
         } catch (Exception e) {
-            return ResponseEntity.status(STATUS_INVALID_INPUT).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 }

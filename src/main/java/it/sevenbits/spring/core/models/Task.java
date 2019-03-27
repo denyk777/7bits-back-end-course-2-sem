@@ -11,6 +11,15 @@ import java.util.UUID;
 public class Task {
     private String id;
     private String text;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getId() {
         return id;
@@ -32,9 +41,10 @@ public class Task {
      * @param text in task
      */
     @JsonCreator
-    public Task(final @JsonProperty ("text") String text) {
-        this.id = UUID.randomUUID().toString();
+    public Task(final String id, String text, String status) {
+        this.id = id;
         this.text = text;
+        this.status = status;
     }
 
     private Task() {

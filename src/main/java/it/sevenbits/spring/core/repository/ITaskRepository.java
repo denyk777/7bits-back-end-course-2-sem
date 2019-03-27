@@ -1,6 +1,8 @@
 package it.sevenbits.spring.core.repository;
 
 import it.sevenbits.spring.core.models.Task;
+import it.sevenbits.spring.web.models.CreateTaskTextRequest;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -13,7 +15,7 @@ public interface ITaskRepository {
      * @param task task
      * @return returns mined class
      */
-    Task addTask(Task task);
+    Task addTask(CreateTaskTextRequest task);
 
     /**
      * returns the entire list of tasks
@@ -32,7 +34,9 @@ public interface ITaskRepository {
      * @param newText rewrite text task
      * @return function execution status
      */
-    boolean updateClass(String id, String newText);
+    boolean updateText(String id, String newText);
+
+    boolean updateStatus(String id, String newStatus);
 
     /**
      * @param id task
