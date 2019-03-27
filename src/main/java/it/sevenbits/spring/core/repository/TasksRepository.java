@@ -1,6 +1,6 @@
 package it.sevenbits.spring.core.repository;
 
-import it.sevenbits.spring.core.model.Task;
+import it.sevenbits.spring.core.models.Task;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,10 +15,7 @@ public class TasksRepository implements ITaskRepository {
     /**
      * default constructor
      */
-    public TasksRepository() {
-        Task task = new Task("init");
-        tasks.add(task);
-    }
+    public TasksRepository() {}
 
     /**
      *

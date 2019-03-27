@@ -1,4 +1,4 @@
-package it.sevenbits.spring.core.model;
+package it.sevenbits.spring.core.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

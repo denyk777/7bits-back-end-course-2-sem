@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Main class
  */
 @SpringBootApplication
-class Application {
+public class Application {
     /**
      * @param args args
      */

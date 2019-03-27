@@ -1,5 +1,5 @@
 /*
-package it.sevenbits.spring.core.model;
+package it.sevenbits.spring.core.models;
 Contains class task
   Task:
     type: object

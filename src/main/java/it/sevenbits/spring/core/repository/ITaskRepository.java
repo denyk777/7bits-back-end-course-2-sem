@@ -1,6 +1,6 @@
 package it.sevenbits.spring.core.repository;
 
-import it.sevenbits.spring.core.model.Task;
+import it.sevenbits.spring.core.models.Task;
 
 import java.util.List;
 
