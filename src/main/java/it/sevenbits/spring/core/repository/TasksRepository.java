@@ -37,6 +37,17 @@ public class TasksRepository implements ITaskRepository {
     }
 
     @Override
+    public List<Task> getTaskByStatus(String status) {
+        List<Task> statusListTask = new ArrayList<>();
+        for (Task task: tasks) {
+            if (task.getStatus().equals(status)) {
+                statusListTask.add(task);
+            }
+        }
+        return statusListTask;
+    }
+
+    @Override
     public Task getTaskById(final String id) {
         for (Task item : tasks) {
             if (item.getId().equals(id)) {

@@ -1,5 +1,6 @@
 package it.sevenbits.spring.web.controllers;
 
+import it.sevenbits.spring.web.models.CreateStatusRequest;
 import it.sevenbits.spring.web.models.CreateTaskRequest;
 import it.sevenbits.spring.core.models.Task;
 import it.sevenbits.spring.core.repository.ITaskRepository;
@@ -31,11 +32,16 @@ public class TasksController {
      */
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
     @ResponseBody
-    private ResponseEntity<List<Task>> getTask() {
-        try {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(repository.getAllTask());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    private ResponseEntity<List<Task>> getTask(@RequestParam(required = false) String status) {
+        CreateStatusRequest statusRequest = new CreateStatusRequest();
+        if (status != null) {
+            if (CreateStatusRequest.getStatus(status) != null)  {
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(repository.getTaskByStatus(status));
+            } else  {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -45,10 +51,11 @@ public class TasksController {
      */
     @RequestMapping(value = "/tasks", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Task> addTask(final @RequestBody CreateTaskTextRequest taskText) {
+    public ResponseEntity<String> addTask(final @RequestBody CreateTaskTextRequest taskText) {
         try {
             Task newTask = repository.addTask(taskText);
-            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(newTask);
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .body("{\n  \"text\": \"" + newTask.getText() + "\"\n}");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -67,24 +74,30 @@ public class TasksController {
 
     @RequestMapping(value = "/tasks/{taskId}", method = RequestMethod.PATCH)
     @ResponseBody
-    private ResponseEntity updateTask(final @PathVariable("taskId") String id,
+    private ResponseEntity<String> updateTask(final @PathVariable("taskId") String id,
                                       final  @RequestBody CreateTaskRequest jsonArgument) {
 
-            boolean updateText = false, updateStatus = false;
-            if (jsonArgument.getText() != null) {
-                updateText = repository.updateText(id, jsonArgument.getText());
+        switch (jsonArgument.getStatusState()) {
+            case 0: {
+                repository.updateText(id, jsonArgument.getText());
+                repository.updateStatus(id, jsonArgument.getStatus());
+                return ResponseEntity.status(HttpStatus.OK).body("{\n  \"new text\": \"" + jsonArgument.getText() +
+                        "\",\n  \"status\": \"" + jsonArgument.getStatus() + "\"\n}");
             }
-            if (jsonArgument.getStatus() != null) {
-                updateStatus = repository.updateStatus(id, jsonArgument.getStatus());
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            case 1: {
+                repository.updateStatus(id, jsonArgument.getStatus());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"status\": \"" +
+                        jsonArgument.getStatus() + "\"\n}");
             }
-            if (updateText || updateStatus) {
-                return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-            } else {
+            case 2: {
+                repository.updateText(id, jsonArgument.getText());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"new text\": \"" +
+                        jsonArgument.getText() + "\"\n}");
+            }
+            default: {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-
+        }
     }
 
     @RequestMapping(value = "/tasks/{taskId}", method = RequestMethod.DELETE)
@@ -92,7 +105,7 @@ public class TasksController {
     private ResponseEntity updateTask(final @PathVariable("taskId") String id) {
         try {
             if (repository.deleteTask(id)) {
-                return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+                return ResponseEntity.status(HttpStatus.OK).build();
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }

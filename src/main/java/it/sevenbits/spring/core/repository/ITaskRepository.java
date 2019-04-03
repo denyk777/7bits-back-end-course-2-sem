@@ -23,6 +23,8 @@ public interface ITaskRepository {
      */
     List<Task> getAllTask();
 
+    List<Task> getTaskByStatus(String status);
+
     /**
      * @param id task
      * @return task

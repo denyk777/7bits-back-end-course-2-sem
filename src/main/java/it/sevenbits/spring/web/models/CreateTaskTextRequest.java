@@ -3,10 +3,10 @@ package it.sevenbits.spring.web.models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 public class CreateTaskTextRequest {
-    @NotNull
+    @NotBlank
     private String taskText;
 
     public String getTaskText() {
