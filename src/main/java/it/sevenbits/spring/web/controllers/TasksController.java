@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ public class TasksController {
      */
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
     @ResponseBody
-    private ResponseEntity<List<Task>> getTask(@RequestParam(required = false) String status) {
+    private ResponseEntity<List<Task>> getTask(@RequestParam(value = "status", required = false, defaultValue = "inbox") String status) {
         CreateStatusRequest statusRequest = new CreateStatusRequest();
         if (status != null) {
             if (CreateStatusRequest.getStatus(status) != null)  {
@@ -51,11 +52,10 @@ public class TasksController {
      */
     @RequestMapping(value = "/tasks", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> addTask(final @RequestBody CreateTaskTextRequest taskText) {
+    public ResponseEntity<String> addTask(final @RequestBody @Valid CreateTaskTextRequest taskText) {
         try {
             Task newTask = repository.addTask(taskText);
-            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON_UTF8)
-                    .body("{\n  \"text\": \"" + newTask.getText() + "\"\n}");
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON_UTF8).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -76,27 +76,30 @@ public class TasksController {
     @ResponseBody
     private ResponseEntity<String> updateTask(final @PathVariable("taskId") String id,
                                       final  @RequestBody CreateTaskRequest jsonArgument) {
-
-        switch (jsonArgument.getStatusState()) {
-            case 0: {
-                repository.updateText(id, jsonArgument.getText());
-                repository.updateStatus(id, jsonArgument.getStatus());
-                return ResponseEntity.status(HttpStatus.OK).body("{\n  \"new text\": \"" + jsonArgument.getText() +
-                        "\",\n  \"status\": \"" + jsonArgument.getStatus() + "\"\n}");
+        if (repository.getTaskById(id) != null) {
+            switch (jsonArgument.getStatusState()) {
+                case 0: {
+                    repository.updateText(id, jsonArgument.getText());
+                    repository.updateStatus(id, jsonArgument.getStatus());
+                    return ResponseEntity.status(HttpStatus.OK).body("{\n  \"new text\": \"" + jsonArgument.getText() +
+                            "\",\n  \"status\": \"" + jsonArgument.getStatus() + "\"\n}");
+                }
+                case 1: {
+                    repository.updateStatus(id, jsonArgument.getStatus());
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"status\": \"" +
+                            jsonArgument.getStatus() + "\"\n}");
+                }
+                case 2: {
+                    repository.updateText(id, jsonArgument.getText());
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"new text\": \"" +
+                            jsonArgument.getText() + "\"\n}");
+                }
+                default: {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                }
             }
-            case 1: {
-                repository.updateStatus(id, jsonArgument.getStatus());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"status\": \"" +
-                        jsonArgument.getStatus() + "\"\n}");
-            }
-            case 2: {
-                repository.updateText(id, jsonArgument.getText());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"new text\": \"" +
-                        jsonArgument.getText() + "\"\n}");
-            }
-            default: {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 

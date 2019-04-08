@@ -3,9 +3,6 @@ package it.sevenbits.spring.web.models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotNull;
-import java.io.IOException;
-
 /**
  * Take json argument for patch
  */
@@ -25,7 +22,7 @@ public class CreateTaskRequest {
     public int getStatusState() {
         if ((validStatus(status) != null) && (newText != null)) {
             return 0;
-        } else if (validStatus(status) != null && newText == null){
+        } else if (validStatus(status) != null && newText == null) {
             return 1;
         } else if (validStatus(status) == null && newText != null) {
             return 2;
