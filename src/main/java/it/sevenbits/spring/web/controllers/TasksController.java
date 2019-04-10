@@ -1,10 +1,13 @@
 package it.sevenbits.spring.web.controllers;
 
+import com.sun.net.httpserver.Headers;
+import com.sun.xml.internal.ws.server.sei.MessageFiller;
 import it.sevenbits.spring.web.models.CreateStatusRequest;
 import it.sevenbits.spring.web.models.CreateTaskRequest;
 import it.sevenbits.spring.core.models.Task;
 import it.sevenbits.spring.core.repository.ITaskRepository;
 import it.sevenbits.spring.web.models.CreateTaskTextRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +42,7 @@ public class TasksController {
             if (CreateStatusRequest.getStatus(status) != null)  {
                 return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(repository.getTaskByStatus(status));
             } else  {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -55,7 +58,10 @@ public class TasksController {
     public ResponseEntity<String> addTask(final @RequestBody @Valid CreateTaskTextRequest taskText) {
         try {
             Task newTask = repository.addTask(taskText);
-            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON_UTF8).build();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Location", "/task/" + newTask.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .headers(headers).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -66,7 +72,7 @@ public class TasksController {
     private ResponseEntity<Task> getTaskById(final @PathVariable("taskId") String id) {
         Task task = repository.getTaskById(id);
         if (task != null) {
-            return ResponseEntity.status(HttpStatus.ACCEPTED).contentType(MediaType.APPLICATION_JSON).body(task);
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(task);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -75,29 +81,23 @@ public class TasksController {
     @RequestMapping(value = "/tasks/{taskId}", method = RequestMethod.PATCH)
     @ResponseBody
     private ResponseEntity<String> updateTask(final @PathVariable("taskId") String id,
-                                      final  @RequestBody CreateTaskRequest jsonArgument) {
+                                      final @RequestBody CreateTaskRequest jsonArgument) {
         if (repository.getTaskById(id) != null) {
-            switch (jsonArgument.getStatusState()) {
-                case 0: {
+            if (jsonArgument.getText() != null) {
+                if (jsonArgument.validText() != null) {
                     repository.updateText(id, jsonArgument.getText());
-                    repository.updateStatus(id, jsonArgument.getStatus());
-                    return ResponseEntity.status(HttpStatus.OK).body("{\n  \"new text\": \"" + jsonArgument.getText() +
-                            "\",\n  \"status\": \"" + jsonArgument.getStatus() + "\"\n}");
-                }
-                case 1: {
-                    repository.updateStatus(id, jsonArgument.getStatus());
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"status\": \"" +
-                            jsonArgument.getStatus() + "\"\n}");
-                }
-                case 2: {
-                    repository.updateText(id, jsonArgument.getText());
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\n  \"new text\": \"" +
-                            jsonArgument.getText() + "\"\n}");
-                }
-                default: {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
                 }
             }
+            if (jsonArgument.getStatus() != null) {
+                if (jsonArgument.validStatus() != null) {
+                    repository.updateStatus(id, jsonArgument.getStatus());
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                }
+            }
+            return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

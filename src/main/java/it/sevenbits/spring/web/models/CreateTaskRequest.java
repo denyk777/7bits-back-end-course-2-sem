@@ -2,39 +2,41 @@ package it.sevenbits.spring.web.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotBlank;
 
 /**
  * Take json argument for patch
  */
+@Validated
 public class CreateTaskRequest {
-    private String newText;
+    @NotBlank
+    private String text;
     private String status;
 
     /**
-     * @param newText in json string
+     * @param text in json string
      */
     @JsonCreator
-    public CreateTaskRequest(final @JsonProperty(required = false) String newText, final @JsonProperty(required = false) String status) {
-        this.newText = newText;
+
+    public CreateTaskRequest(final @JsonProperty(required = false) String text, final @JsonProperty(required = false) String status) {
+        this.text = text;
         this.status = status;
     }
 
-    public int getStatusState() {
-        if ((validStatus(status) != null) && (newText != null)) {
-            return 0;
-        } else if (validStatus(status) != null && newText == null) {
-            return 1;
-        } else if (validStatus(status) == null && newText != null) {
-            return 2;
+    public String validText() {
+        if (!this.text.isEmpty() && !this.text.trim().isEmpty()) {
+            return this.text;
         } else {
-            return 4;
+            return null;
         }
     }
 
-    String validStatus(String status) {
+    public String validStatus() {
         try {
-            if (status.equals("inbox") || status.equals("done")) {
-                return status;
+            if (this.status.equals("inbox") || this.status.equals("done")) {
+                return this.status;
             } else {
                 return null;
             }
@@ -44,10 +46,10 @@ public class CreateTaskRequest {
     }
 
     public String getText() {
-        return newText;
+        return text;
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 }
