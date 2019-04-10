@@ -1,9 +1,6 @@
 package it.sevenbits.spring.core.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.UUID;
 
 /**
  * task class
@@ -13,40 +10,63 @@ public class Task {
     private String text;
     private String status;
 
+    /**
+     * @return status
+     */
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    /**
+     * @param status set status task
+     */
+    public void setStatus(final String status) {
         this.status = status;
     }
 
+    /**
+     * @return task id
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(final String id) {
-        this.id = id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
+    /**
+     * @param text set text task
+     */
     public void setText(final String text) {
         this.text = text;
     }
 
     /**
+     * @param id set id task
+     */
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    /**
+     * @return task text
+     */
+    public String getText() {
+        return text;
+    }
+
+    /**
+     * @param id in task
      * @param text in task
+     * @param status in task
      */
     @JsonCreator
-    public Task(final String id, String text, String status) {
+    public Task(final String id, final String text, final String status) {
         this.id = id;
         this.text = text;
         this.status = status;
     }
 
+    /**
+     * default constructor
+     */
     private Task() {
     }
 }

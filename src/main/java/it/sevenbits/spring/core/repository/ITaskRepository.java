@@ -2,7 +2,6 @@ package it.sevenbits.spring.core.repository;
 
 import it.sevenbits.spring.core.models.Task;
 import it.sevenbits.spring.web.models.CreateTaskTextRequest;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -23,6 +22,10 @@ public interface ITaskRepository {
      */
     List<Task> getAllTask();
 
+    /**
+     * @param status field for filtered
+     * @return filtered list tasks
+     */
     List<Task> getTaskByStatus(String status);
 
     /**
@@ -38,6 +41,11 @@ public interface ITaskRepository {
      */
     boolean updateText(String id, String newText);
 
+    /**
+     * @param id task
+     * @param newStatus rewrite status task
+     * @return function execution status
+     */
     boolean updateStatus(String id, String newStatus);
 
     /**

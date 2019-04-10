@@ -2,8 +2,6 @@ package it.sevenbits.spring.core.repository;
 
 import it.sevenbits.spring.core.models.Task;
 import it.sevenbits.spring.web.models.CreateTaskTextRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +35,7 @@ public class TasksRepository implements ITaskRepository {
     }
 
     @Override
-    public List<Task> getTaskByStatus(String status) {
+    public List<Task> getTaskByStatus(final String status) {
         List<Task> statusListTask = new ArrayList<>();
         for (Task task: tasks) {
             if (task.getStatus().equals(status)) {
@@ -69,7 +67,7 @@ public class TasksRepository implements ITaskRepository {
     }
 
     @Override
-    public boolean updateStatus(final String id, final String newStatus ) {
+    public boolean updateStatus(final String id, final String newStatus) {
         for (Task item : tasks) {
             if (item.getId().equals(id)) {
                 item.setStatus(newStatus);

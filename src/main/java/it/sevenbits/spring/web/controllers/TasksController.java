@@ -1,7 +1,5 @@
 package it.sevenbits.spring.web.controllers;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.xml.internal.ws.server.sei.MessageFiller;
 import it.sevenbits.spring.web.models.CreateStatusRequest;
 import it.sevenbits.spring.web.models.CreateTaskRequest;
 import it.sevenbits.spring.core.models.Task;
@@ -12,7 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 import javax.validation.Valid;
 import java.util.List;
@@ -36,8 +40,8 @@ public class TasksController {
      */
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
     @ResponseBody
-    private ResponseEntity<List<Task>> getTask(@RequestParam(value = "status", required = false, defaultValue = "inbox") String status) {
-        CreateStatusRequest statusRequest = new CreateStatusRequest();
+    private ResponseEntity<List<Task>> getTask(final @RequestParam(value = "status", required = false,
+            defaultValue = "inbox") String status) {
         if (status != null) {
             if (CreateStatusRequest.getStatus(status) != null)  {
                 return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(repository.getTaskByStatus(status));
