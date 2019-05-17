@@ -10,6 +10,16 @@ public class Task {
     private String text;
     private String status;
 
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(final String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    private String createdAt;
+
     /**
      * @return status
      */
@@ -56,12 +66,14 @@ public class Task {
      * @param id in task
      * @param text in task
      * @param status in task
+     * @param createdAt task
      */
     @JsonCreator
-    public Task(final String id, final String text, final String status) {
+    public Task(final String id, final String text, final String status, final String createdAt) {
         this.id = id;
         this.text = text;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
     /**

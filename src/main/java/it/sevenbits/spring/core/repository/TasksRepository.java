@@ -3,10 +3,8 @@ package it.sevenbits.spring.core.repository;
 import it.sevenbits.spring.core.models.Task;
 import it.sevenbits.spring.web.models.CreateTaskTextRequest;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Contains task list
@@ -25,7 +23,9 @@ public class TasksRepository implements ITaskRepository {
      * @return created task
      */
     public Task addTask(final CreateTaskTextRequest task) {
-        Task newTask = new Task(UUID.randomUUID().toString(), task.getTaskText(), "inbox");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssXXX");
+        Task newTask = new Task(UUID.randomUUID().toString(), task.getTaskText(), "inbox",
+                dateFormat.format(new Date()));
         tasks.add(newTask);
         return newTask;
     }
